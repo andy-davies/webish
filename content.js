@@ -15,27 +15,10 @@ async function setup() {
             const tag = metaTags[i];
             metadata[tag.getAttribute("name")] = tag.getAttribute("content");
         }
-
-        console.log(metadata);
-
         const url = `https://api.github.com/repos/${metadata.owner}/${metadata.repo}/contents`;
-        console.log(url);
-
+       
         const response = await fetch(url);
         const nav = createNavigation(await response.json());
-
-        // add showdown.js to the page
-        // const script = document.createElement("script");
-        // script.src = "https://unpkg.com/showdown/dist/showdown.min.js";
-        // document.body.appendChild(script);
-
-        // adjust to avoid security policy issues
-        // const meta = document.createElement("meta");
-        // meta.setAttribute("http-equiv", "Content-Security-Policy");
-        // meta.setAttribute("content", "upgrade-insecure-requests");
-        // document.head.appendChild(meta);
-
-      
     }
 }
 
