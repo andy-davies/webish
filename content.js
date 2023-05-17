@@ -1,4 +1,6 @@
 const html = document.querySelector("html");
+let isEdit = false;
+let raw = "";
 
 let metadata = {};
 
@@ -19,8 +21,67 @@ async function setup() {
        
         const response = await fetch(url);
         const nav = createNavigation(await response.json());
+
+        if(doesUserHavePermissionsToEdit()) {
+            createEditMenu();
+        }
     }
 }
+
+function createEditMenu() {
+    // get the aside element
+    const aside = document.querySelector("aside");
+    // create the edit menu
+    const editMenu = document.createElement("div");
+    editMenu.classList.add("edit-menu");
+    // create the edit button
+    const editButton = document.createElement("button");
+    editButton.innerText = "Edit";
+
+
+    editButton.addEventListener("click", () => {
+        editMenu.classList.toggle("show");
+        isEdit = !isEdit;
+
+        if(isEdit) {
+            editButton.innerText = "Save";
+
+            // set the article to be the value in raw
+            const article = document.querySelector("article");
+            article.innerText = raw;
+
+            // set the article to be editable
+            article.setAttribute("contenteditable", true);
+            article.focus();
+        }   
+        else {
+
+
+
+
+            editButton.innerText = "Edit";
+        }
+    });
+
+    // insert editMenu into aside
+    aside.appendChild(editMenu);
+    // insert editButton into editMenu
+    editMenu.appendChild(editButton);
+   
+}
+
+
+async function saveArticle() {
+    
+}
+
+async function doesUserHavePermissionsToEdit() {
+    const url = `https://api.github.com/repos/${metadata.owner}/${metadata.repo}/collaborators/${metadata.username}/permission`;
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.permission === "admin" || data.permission === "write";
+}
+
 
 async function loadFile(fileName) {
     // load the file from github
@@ -31,13 +92,16 @@ async function loadFile(fileName) {
 }
 
 async function displayFile(fileName) {
-    const text = await loadFile(fileName);
+    raw = await loadFile(fileName);
     const article = document.querySelector("article");
     
     // convert to html using showdown.js
     const converter = new showdown.Converter();
-    article.innerHTML = converter.makeHtml(text);
+    article.innerHTML = converter.makeHtml(raw);
 
+
+    console.log("display file...");
+    console.log(raw);
     
     
 
@@ -65,11 +129,6 @@ async function createNavigation(data) {
             li.appendChild(a);
             navElement.appendChild(li);
         }
-        console.log(file);
-
-       
-
-
     });
     const ul = document.createElement("ul");
     navElement.appendChild(ul);
